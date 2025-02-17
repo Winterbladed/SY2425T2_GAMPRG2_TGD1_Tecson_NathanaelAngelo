@@ -10,11 +10,9 @@ class ENDLESSRUNNER_API AEndlessRunnerActor : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AEndlessRunnerActor();
 
 protected:
-	// void Start Function
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -27,7 +25,6 @@ protected:
 	int MaxHealth;
 
 public:	
-	// void Update Function
 	virtual void Tick(float DeltaTime) override;
 
 };

@@ -5,6 +5,8 @@
 #include "InputActionValue.h"
 #include "RunCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathDelegate);
+
 UCLASS()
 class ARunCharacter : public ACharacter
 {
@@ -42,6 +44,17 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnDeathDelegate OnDeath;
+
+	UFUNCTION()
+	void Die();
+
+	UFUNCTION()
+	void RestartLevel();
+
 protected:
 	virtual void BeginPlay() override;
+
+	bool bHasDied;
 };

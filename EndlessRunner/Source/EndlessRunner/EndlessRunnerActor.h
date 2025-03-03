@@ -27,4 +27,12 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UBoxComponent* CollisionBox;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Obstacle")
+	void OnTrigger();
+
+	UFUNCTION()
+	void HandleCollision(AActor* OverlappedActor, AActor* OtherActor);
 };

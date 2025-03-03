@@ -22,8 +22,17 @@ class ENDLESSRUNNER_API AEndlessRunnerTile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Trigger, meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* BoxCollision;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Trigger, meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* ObstacleSpawnArea;
+
 	UPROPERTY(VisibleAnywhere, BlueprintAssignable, Category = "Events")
 	FTileExitedDelegate OnTileExited;
+
+	UFUNCTION()
+	void SpawnObstacle();
+
+	UPROPERTY(EditAnywhere, Category = "Obstacles")
+	TArray<TSubclassOf<AEndlessRunnerActor>> ObstacleTypes;
 
 public:	
 	AEndlessRunnerTile();

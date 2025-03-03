@@ -7,6 +7,7 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
 
 ARunCharacter::ARunCharacter()
 {
@@ -30,9 +31,10 @@ ARunCharacter::ARunCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	bHasDied = false;
 }
 
-// void Start
 void ARunCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -45,7 +47,6 @@ void ARunCharacter::BeginPlay()
 	}
 }
 
-// void Update
 void ARunCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -60,9 +61,7 @@ void ARunCharacter::Move(const FInputActionValue& Value)
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		//Forward
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		//Right
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
@@ -90,4 +89,25 @@ void ARunCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARunCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARunCharacter::Look);
 	}
+}
+
+void ARunCharacter::Die()
+{
+	if (bHasDied) return;
+
+	bHasDied = true;
+	GetController()->DisableInput(Cast<APlayerController>(GetController()));
+	GetMesh()->SetVisibility(false);
+	OnDeath.Broadcast();
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LoadObject<UParticleSystem>(nullptr, TEXT("ParticleSystem'/Game/Particles/P_Explosion.P_Explosion'")), GetActorLocation());
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), LoadObject<USoundBase>(nullptr, TEXT("SoundWave'/Game/Sounds/Explosion01.Explosion01'")), GetActorLocation());
+
+	FTimerHandle TimerHandle;
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ARunCharacter::RestartLevel, 2.0f, false);
+}
+
+void ARunCharacter::RestartLevel()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }

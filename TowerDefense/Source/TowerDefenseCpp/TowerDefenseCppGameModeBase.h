@@ -33,6 +33,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddGold(int amount);
 
+	UFUNCTION(BlueprintCallable)
+	void Win();
+
+	bool IsWon;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -62,5 +67,4 @@ private:
 	void ReduceHp();
 
 	void QuitGame();
-
 };

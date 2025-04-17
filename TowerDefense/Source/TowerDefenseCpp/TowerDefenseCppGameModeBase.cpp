@@ -93,10 +93,11 @@ void ATowerDefenseCppGameModeBase::StartNewWave()
 	}
 
 	CurrentWaveItr++;
-	if (CurrentWaveItr >= TotalWaveCount)
+	if (CurrentWaveItr >= TotalWaveCount && !IsWon)
 	{
 		CurrentWaveItr = TotalWaveCount;
-		QuitGame();
+		Win();
+		IsWon = true;
 	}
 }
 

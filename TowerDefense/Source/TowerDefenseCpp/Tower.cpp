@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Tower.h"
 #include "Components/SphereComponent.h"
 #include "Enemy.h"
@@ -8,45 +5,33 @@
 #include "Components/ArrowComponent.h"
 #include "Projectile.h"
 
-// Sets default values
 ATower::ATower()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 	Tower = CreateDefaultSubobject<UArrowComponent>("Tower");
 	Tower->SetupAttachment(RootComponent);
-
 	Base = CreateDefaultSubobject<UStaticMeshComponent>("Tower Base");
 	Base->SetupAttachment(Tower);
-
 	BarrelMesh = CreateDefaultSubobject<UStaticMeshComponent>("Barrel Mesh");
 	BarrelMesh->SetupAttachment(Tower);
-
 	Bore = CreateDefaultSubobject<UArrowComponent>("Bore");
 	Bore->SetupAttachment(BarrelMesh);	
-
 	RangeDetector = CreateDefaultSubobject<USphereComponent>("Range Hitbox");
 	RangeDetector->SetupAttachment(Tower);
-	
 	CurrentLevel = 0;
 }
 
-// Called when the game starts or when spawned
 void ATower::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	UpgradeTower();
 }
 
 void ATower::FindTargetWithinRange()
 {
-	TArray<AActor* > Targets; //possible targets
+	TArray<AActor* > Targets;
 	RangeDetector->GetOverlappingActors(Targets, AEnemy::StaticClass());
-
 	float ClosestDistance = MAX_FLT;
-
 	for (AActor* EnemyActor : Targets)
 	{
 		AEnemy* Target = Cast<AEnemy>(EnemyActor);
@@ -60,12 +45,10 @@ void ATower::FindTargetWithinRange()
 			}
 		}
 	}	
-
 	if (Targets.Num() == 0)
 	{
 		CurrentTarget = nullptr;
 	}
-
 }
 
 void ATower::SetTarget(AActor* target)
@@ -76,16 +59,12 @@ void ATower::SetTarget(AActor* target)
 void ATower::LookAtTarget()
 {
 	FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentTarget->GetActorLocation());
-
 	float YawRotation = LookAtRotation.Yaw;
 	float PitchRotation = LookAtRotation.Pitch;
-
 	FRotator HorizontalRotation(0.0f, YawRotation, 0.0f);
 	FRotator VerticalRotation(PitchRotation, -90.0f, 0.0f);
-
 	SetActorRotation(HorizontalRotation);
 	BarrelMesh->SetRelativeRotation(VerticalRotation);
-
 	if (!GetWorldTimerManager().IsTimerActive(FireRateHandler))
 	{
 		Shoot();
@@ -142,7 +121,6 @@ void ATower::UpgradeTower()
 		CurrentLevel = 3;
 	}
 	int levelItr = CurrentLevel - 1;
-
 	Base->SetStaticMesh(UpgradeData[levelItr]->Base);
 	BarrelMesh->SetStaticMesh(UpgradeData[levelItr]->Barrel);
 	Damage = UpgradeData[levelItr]->Damage;
@@ -153,23 +131,19 @@ void ATower::UpgradeTower()
 	RangeDetector->SetSphereRadius(UpgradeData[levelItr]->Range);
 }
 
-// Called every frame
 void ATower::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	if (!CurrentTarget || !IsCurrentTargetWithinRange() || !CurrentTarget->IsValidLowLevel())
 	{
 		FindTargetWithinRange();
 		GetWorld()->GetTimerManager().ClearTimer(FireRateHandler);
-		//UE_LOG(LogTemp, Warning, TEXT("No Target Found"));
 	} 
 	else if(IsAttackingTower && CurrentTarget && CurrentTarget->IsValidLowLevel())
 	{
 		if (IsValid(CurrentTarget))
 		{
 			LookAtTarget();
-			
 		}
 		else
 		{
@@ -177,14 +151,11 @@ void ATower::Tick(float DeltaTime)
 			GetWorld()->GetTimerManager().ClearTimer(FireRateHandler);
 		}
 	}
-
 }
 
-// Called to bind functionality to input
 void ATower::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void ATower::SetDamage(float damage)
@@ -201,4 +172,3 @@ float ATower::GetFireRate()
 {
 	return FireRate;
 }
-

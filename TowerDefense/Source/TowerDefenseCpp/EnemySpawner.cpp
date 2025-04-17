@@ -1,26 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "EnemySpawner.h"
 #include "Enemy.h"
 
-// Sets default values
 AEnemySpawner::AEnemySpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	
 	CurrentSpawnedEnemiesCount = 0;
 	SpawnDelay = 3.0f;
-	
 }
 
-// Called when the game starts or when spawned
 void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void AEnemySpawner::SpawnEnemy()
@@ -29,27 +19,20 @@ void AEnemySpawner::SpawnEnemy()
 	{
 		FVector SpawnLocation = GetActorLocation();
 		FRotator SpawnRotation = GetActorRotation();
-
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		SpawnParameters.Owner = this;
-
 		int32 RandInt = FMath::RandRange(0, BP_Enemy.Num() - 1);
-
 		AEnemy* Enemy = GetWorld()->SpawnActor<AEnemy>(BP_Enemy[RandInt], SpawnLocation, SpawnRotation, SpawnParameters);
-
 		Enemy->ScaleHealthPoints(HpScaling);
 		Enemy->ScaleGoldReward(GoldScaling);
 		Enemy->OnEnemyDestroyed.AddDynamic(this, &AEnemySpawner::AddDestroyedEnemyCount);
-			
 		if (WaypointsHolder.Num() != 0)
 		{			
 			Enemy->SetWayPoints(WaypointsHolder);
 			Enemy->MoveToWayPoints();
 		}
-
 		CurrentSpawnedEnemiesCount++;
-
 		if (CurrentSpawnedEnemiesCount < SpawnAmount)
 		{
 			SpawnEnemies();
@@ -74,11 +57,9 @@ void AEnemySpawner::AddDestroyedEnemyCount(int goldRewarded)
 	OnEnemySpawnedDeath.Broadcast(goldRewarded);	
 }
 
-// Called every frame
 void AEnemySpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AEnemySpawner::SetWaveParameters(TArray<TSubclassOf<class AEnemy>> enemySet, float spawnDelay, int32 spawnAmount, float spawnInterval, float hpScaling, float goldScaling)
@@ -88,9 +69,7 @@ void AEnemySpawner::SetWaveParameters(TArray<TSubclassOf<class AEnemy>> enemySet
 	SpawnInterval = spawnInterval;
 	HpScaling = hpScaling;
 	GoldScaling = goldScaling;
-
 	BP_Enemy.Empty();
-
 	for (TSubclassOf<AEnemy> enemyClass : enemySet)
 	{
 		if (enemyClass.Get())
@@ -100,4 +79,3 @@ void AEnemySpawner::SetWaveParameters(TArray<TSubclassOf<class AEnemy>> enemySet
 		}
 	}
 }
-
